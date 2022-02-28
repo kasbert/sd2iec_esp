@@ -190,6 +190,9 @@ imgtype_t check_imageext(uint8_t *name) {
   if (ext == NULL)
     return IMG_UNKNOWN;
 
+  if (ustrlen(ext) != 4)
+    return IMG_UNKNOWN;
+
   f = toupper(*++ext);
   s = toupper(*++ext);
   t = toupper(*++ext);
@@ -199,14 +202,51 @@ imgtype_t check_imageext(uint8_t *name) {
     return IMG_IS_M2I;
 #endif
 
-  if (f == 'D')
+  if (f == 'D') {
     if ((s == '6' && t == '4') ||
         (s == 'N' && t == 'P') ||
         ((s == '4' || s == '7' || s == '8') &&
-         (t == '1')))
+         (t == '1'))) {
       return IMG_IS_DISK;
+    }
+  }
 
- return IMG_UNKNOWN;
+  return IMG_UNKNOWN;
+}
+
+/**
+ * should_save_raw - check if the file should be saved header-free
+ * @name: pointer to the file name
+ *
+ * This function checks if the file of the given name should be saved
+ * without any header for improved PC compatiblity.
+ */
+static bool should_save_raw(uint8_t* name) {
+  if (check_imageext(name) != IMG_UNKNOWN)
+    return true;
+
+  uint8_t* ext = ustrrchr(name, '.');
+  if (ext == NULL)
+    return false;
+
+  ext++;
+
+  if (*ext == 't' || *ext == 'T')
+    ext++;
+
+  if (ustrlen(ext) != 3)
+    return false;
+
+  uint8_t ucext[3];
+
+  for (int i = 0; i < 3; i++) {
+    ucext[i] = toupper(*ext++);
+  }
+
+  if (ucext[0] == 'C' && ucext[1] == 'R' && ucext[2] == 'T')
+    return true;
+
+  return false;
 }
 
 /**
@@ -241,7 +281,7 @@ static void pet2asc(uint8_t *buf) {
  * file name. Returns true if it is, false if not.
  */
 static bool is_valid_fat_char(const uint8_t c) {
-  if (isalnum(c) || c == '!' ||
+  if (isalnum(c) || c == '!' || c == ' ' ||
       (c >= '#' && c <= ')') ||
       c == '-' || c == '.')
     return true;
@@ -259,10 +299,6 @@ static bool is_valid_fat_char(const uint8_t c) {
 static bool is_valid_fat_name(const uint8_t *name) {
   const uint8_t *ptr = name;
   unsigned char dots = 0;
-
-  /* check for leading space */
-  if (*name == ' ')
-    return false;
 
   /* check all characters for validity */
   while (*ptr) {
@@ -309,7 +345,7 @@ static uint8_t* build_name(uint8_t *name, uint8_t type) {
 #endif
 
   /* known disk-image extensions are always without header or suffix */
-  if (type == TYPE_PRG && check_imageext(name) != IMG_UNKNOWN)
+  if (type == TYPE_PRG && should_save_raw(name))
     return NULL;
 
   /* PC64 mode or invalid FAT name? */
@@ -676,19 +712,22 @@ FRESULT create_file(path_t *path, cbmdirent_t *dent, uint8_t type, buffer_t *buf
   }
 
   partition[path->part].fatfs.curr_dir = path->dir.fat;
-  do {
-    res = f_open(&partition[path->part].fatfs, &buf->pvt.fat.fh, name,FA_WRITE | FA_CREATE_NEW | (recordlen?FA_READ:0));
-    if (res == FR_EXIST && x00ext != NULL) {
-      /* File exists, increment extension */
-      *x00ext += 1;
-      if (*x00ext == '9'+1) {
-        *x00ext = '0';
-        *(x00ext-1) += 1;
-        if (*(x00ext-1) == '9'+1)
-          break;
-      }
+
+  res = f_open(&partition[path->part].fatfs, &buf->pvt.fat.fh,
+               name, FA_WRITE | FA_CREATE_NEW | (recordlen ? FA_READ : 0));
+  while (x00ext != NULL && res == FR_EXIST) {
+    /* File exists, increment extension */
+    *x00ext += 1;
+    if (*x00ext == '9'+1) {
+      *x00ext = '0';
+      *(x00ext-1) += 1;
+      if (*(x00ext-1) == '9'+1)
+        break;
     }
-  } while (res == FR_EXIST);
+
+    res = f_open(&partition[path->part].fatfs, &buf->pvt.fat.fh,
+                 name, FA_WRITE | FA_CREATE_NEW | (recordlen ? FA_READ : 0));
+  }
 
   if (res != FR_OK)
     return res;
