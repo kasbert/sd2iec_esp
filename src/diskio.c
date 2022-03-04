@@ -25,7 +25,9 @@
 
 #include "config.h"
 #include "diskio.h"
+#ifdef HAVE_ATA
 #include "ata.h"
+#endif
 #include "sdcard.h"
 
 volatile enum diskstates disk_state;

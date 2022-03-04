@@ -67,6 +67,10 @@ extern iec_data_t iec_data;
 uint8_t iec_check_atn(void);
 void iec_init(void);
 
+#ifdef __ets__
+void iec_mainloop(void);
+#else
 void  __attribute__ ((noreturn)) iec_mainloop(void);
+#endif
 
 #endif

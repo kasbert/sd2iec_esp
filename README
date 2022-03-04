@@ -970,3 +970,45 @@ ATN goes to PD3 (marked 18).
 GND goes to any GND (you can find multiple grounds on the board, there's one located next to pin #53).
 The RESET pin can be skipped, sd2iec doesn't need this for full operation.
 
+
+ESP8266 considerations
+======================
+
+* NO Fastloaders
+* NO TCP/IP
+* NO Buttons
+* Only one (build in) Led
+
+Fetch ESP8266_NONOS_SDK from https://github.com/espressif/ESP8266_NONOS_SDK
+Point environment variable ESP_SDK to the SDK directory.
+Install esptool.
+
+Current configuration expects 32Mbit (4MB) flash memory.
+
+I used Wemos D1 mini with the following pinout
+ GPIO5 = SCL - IEC CLOCK
+ GPIO4 = SDA - IEC DATA
+ GPIO0 - IEC ATN (pulled up, connected to FLASH button, boot fails if pulled LOW)
+ GPIO16 - IEC SRQ (no interrupt, HIGH at boot)
+ GPIO2 - Internal LED (pulled up, LED on low)
+ GPIO3 = RX - (TODO Button 1 ?)
+ GPIO1 = TX - (TODO LED 2 ?)
+ ADC0 - (TODO Button 2 ?)
+ GPIO 12,13,14,15 SD card
+
+Some of the flash is used as a FAT image. You can create one with linux commands:
+ dd if=/dev/zero bs=512 count=7112 of=eeprom.img
+ mformat -i eeprom.img -v internal
+ mcopy -i eeprom.img /usr/local/share/vice/DRIVES/dos1541 ::
+ mcopy -i eeprom.img ../warez/santa.prg ::
+ esptool write_flash 0x81000 eeprom.img
+
+Save rom image name
+OPEN 15,8,15
+PRINT#15,"XR:dos1541"
+
+Internal "ATA" drive is the default drive to use. To use SD as default, issue commands:
+OPEN 15,8,15
+PRINT#15,"XD0=4"
+PRINT#15,"XD1=0"
+PRINT#15,"XW"

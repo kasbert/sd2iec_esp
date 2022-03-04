@@ -96,6 +96,80 @@ static uint8_t cardtype[MAX_CARDS];
 /*  Utility functions                                                        */
 /* ------------------------------------------------------------------------- */
 
+#ifdef CONFIG_DEBUG_VERBOSE
+char *sdcmd2str(int cmd) {
+  switch (cmd) {
+  case GO_IDLE_STATE:
+    return "GO_IDLE_STATE";
+  case SEND_OP_COND:
+    return "SEND_OP_COND";
+  case SWITCH_FUNC:
+    return "SWITCH_FUNC";
+  case SEND_IF_COND:
+    return "SEND_IF_COND";
+  case SEND_CSD:
+    return "SEND_CSD";
+  case SEND_CID:
+    return "SEND_CID";
+  case STOP_TRANSMISSION:
+    return "STOP_TRANSMISSION";
+  case SEND_STATUS:
+    return "SEND_STATUS";
+  case SET_BLOCKLEN:
+    return "SET_BLOCKLEN";
+  case READ_SINGLE_BLOCK:
+    return "READ_SINGLE_BLOCK";
+  case READ_MULTIPLE_BLOCK:
+    return "READ_MULTIPLE_BLOCK";
+  case WRITE_BLOCK:
+    return "WRITE_BLOCK";
+  case WRITE_MULTIPLE_BLOCK:
+    return "WRITE_MULTIPLE_BLOCK";
+  case PROGRAM_CSD:
+    return "PROGRAM_CSD";
+  case SET_WRITE_PROT:
+    return "SET_WRITE_PROT";
+  case CLR_WRITE_PROT:
+    return "CLR_WRITE_PROT";
+  case SEND_WRITE_PROT:
+    return "SEND_WRITE_PROT";
+  case ERASE_WR_BLK_STAR_ADDR:
+    return "ERASE_WR_BLK_STAR_ADDR";
+  case ERASE_WR_BLK_END_ADDR:
+    return "ERASE_WR_BLK_END_ADDR";
+  case ERASE:
+    return "ERASE";
+  case LOCK_UNLOCK:
+    return "LOCK_UNLOCK";
+  case APP_CMD:
+    return "APP_CMD";
+  case GEN_CMD:
+    return "GEN_CMD";
+  case READ_OCR:
+    return "READ_OCR";
+  case CRC_ON_OFF:
+    return "CRC_ON_OFF";
+    /*
+  case SD_STATUS:
+    return "SD_STATUS";
+    */
+  case SD_SEND_NUM_WR_BLOCKS:
+    return "SD_SEND_NUM_WR_BLOCKS";
+  case SD_SET_WR_BLK_ERASE_COUNT:
+    return "SD_SET_WR_BLK_ERASE_COUNT";
+  case SD_SEND_OP_COND:
+    return "SD_SEND_OP_COND";
+    /*
+  case SD_SET_CLR_CARD_DETECT:
+    return "SD_SET_CLR_CARD_DETECT";
+    */
+  case SD_SEND_SCR:
+    return "SD_SEND_SCR";
+  }
+  return "UNKNOWN CMD";
+}
+#endif
+
 /**
  * swap_word - swaps the bytes in a uint32 value
  * @input: input byte
@@ -234,8 +308,9 @@ static uint8_t send_command(const uint8_t  card,
                             const uint32_t parameter) {
   tick_t   timeout;
   uint8_t  crc, errors, res;
+#ifndef __ets__
   uint32_t tmp;
-
+#endif
   // FIXME: Only works on little-endian
   // (but is much more efficient on AVR)
   union {
@@ -259,10 +334,18 @@ static uint8_t send_command(const uint8_t  card,
     set_sd_led(1);
 
     /* send command */
+#ifdef __ets__
+    spi_tx_byte(0xff); // TODO remove
+    spi_tx_byte(0xff); // TODO remove
+    spi_tx_byte(0xff); // TODO remove
+    spi_transaction(8, cmd, 32, parameter, 8, &crc, 0, 0, 0);
+    system_soft_wdt_feed();
+#else
     spi_tx_byte(cmd);
     tmp = swap_word(parameter); // AVR spi_tx_block clobbers the buffer
     spi_tx_block(&tmp, 4);
     spi_tx_byte(crc);
+#endif
 
     /* wait up to 500ms for a valid response */
     timeout = getticks() + HZ/2;
@@ -271,6 +354,11 @@ static uint8_t send_command(const uint8_t  card,
     } while ((res & 0x80) &&
              time_before(getticks(), timeout));
 
+#ifdef CONFIG_DEBUG_VERBOSE
+    if (res) {
+      ETS_DEBUG("SD %15s %08x %02x  RESPONSE %02x", sdcmd2str(cmd), parameter, crc, res);
+    }
+#endif
     /* check for CRC error */
     if (res & STATUS_CRC_ERROR) {
       uart_putc('x');

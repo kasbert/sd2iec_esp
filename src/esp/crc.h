@@ -1,4 +1,5 @@
 /* sd2iec - SD/MMC to Commodore serial bus interface/controller
+   Copyright (C) 2022 Jarkko Sonninen <kasper@iki.fi>
    Copyright (C) 2007-2017  Ingo Korb <ingo@akana.de>
 
    Inspired by MMC2IEC by Lars Pontoppidan et al.
@@ -19,21 +20,21 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-   bus.h: Common IEC/IEEE bus definitions
+   crc.h: Definitions for CRC calculation routines (AVR version)
 
 */
 
-#ifndef BUS_H
-#define BUS_H
+#ifndef CRC_H
+#define CRC_H
 
-extern uint8_t device_address;
+#include <stdint.h>
 
-void bus_interface_init(void);
-void bus_init(void);
-#ifdef __ets__
-void bus_mainloop(void);
-#else
-void __attribute__((noreturn)) bus_mainloop(void);
+#define CRC16_CCITT_INIT_VALUE 0
+
+uint8_t crc7update(uint8_t crc, uint8_t data);
+uint16_t crc_xmodem_update(uint16_t crc, uint8_t data);
+uint16_t crc_xmodem_block(uint16_t crc, const uint8_t *data, uint32_t length);
+uint16_t crc16_update(uint16_t crc, uint8_t data);
+
 #endif
 
-#endif

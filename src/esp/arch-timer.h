@@ -1,4 +1,5 @@
 /* sd2iec - SD/MMC to Commodore serial bus interface/controller
+   Copyright (C) 2022 Jarkko Sonninen <kasper@iki.fi>
    Copyright (C) 2007-2017  Ingo Korb <ingo@akana.de>
 
    Inspired by MMC2IEC by Lars Pontoppidan et al.
@@ -19,21 +20,37 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-   bus.h: Common IEC/IEEE bus definitions
+   arch-timer.h: Architecture-specific system timer definitions
 
 */
 
-#ifndef BUS_H
-#define BUS_H
+#ifndef ARCH_TIMER_H
+#define ARCH_TIMER_H
 
-extern uint8_t device_address;
+/* Types for unsigned and signed tick values */
+typedef uint32_t tick_t;
+typedef int32_t stick_t;
 
-void bus_interface_init(void);
-void bus_init(void);
-#ifdef __ets__
-void bus_mainloop(void);
-#else
-void __attribute__((noreturn)) bus_mainloop(void);
-#endif
+/* Delay functions */
+static inline void delay_us(unsigned int time) {
+  ets_delay_us(time);
+}
+
+static inline void delay_ms(unsigned int time) {
+  // This is used only in some fastloaders and time <= 20ms
+  ets_delay_us(time * 1000);
+}
+
+/* Timeout functions */
+// FIXME: Accurate enough as function?
+void start_timeout(uint32_t usecs);
+unsigned int has_timed_out(void);
+
+// https://sub.nanona.fi/esp8266/timing-and-ticks.html
+static inline int32_t asm_ccount(void) {
+    int32_t r;
+    asm volatile ("rsr %0, ccount" : "=r"(r));
+    return r;
+}
 
 #endif

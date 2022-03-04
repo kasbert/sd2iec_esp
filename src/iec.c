@@ -327,6 +327,9 @@ static uint8_t iec_listen_handler(const uint8_t cmd) {
   }
 
   while (1) {
+#ifdef __ets__
+    system_soft_wdt_feed();
+#endif
     if (iec_data.iecflags & JIFFY_ACTIVE) {
       iec_bus_t flags;
       set_atn_irq(1);
@@ -419,6 +422,9 @@ static uint8_t iec_talk_handler(uint8_t cmd) {
   }
 
   while (buf->read) {
+#ifdef __ets__
+    system_soft_wdt_feed();
+#endif
     do {
       uint8_t finalbyte = (buf->position == buf->lastused);
       if (iec_data.iecflags & JIFFY_LOAD) {
@@ -559,8 +565,15 @@ void iec_mainloop(void) {
       set_dirty_led(1);
 
       /* Wait until the sleep key is used again */
-      while (!key_pressed(KEY_SLEEP))
+      while (!key_pressed(KEY_SLEEP)) {
+#ifdef __ets__
+        // FIXME not implemented
+        set_button_irq(1);
+        return;
+#else
         system_sleep();
+#endif
+      }
       reset_key(KEY_SLEEP);
 
       update_leds();
@@ -583,7 +596,13 @@ void iec_mainloop(void) {
           display_service();
           reset_key(KEY_DISPLAY);
         }
+#ifdef __ets__
+        set_clock(1);
+        set_data(1);
+        return;
+#else
         system_sleep();
+#endif
       }
 
       if (iec_data.bus_state != BUS_SLEEP)

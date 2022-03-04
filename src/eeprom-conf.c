@@ -32,6 +32,7 @@
 #include "iec.h"
 #include "timer.h"
 #include "ustring.h"
+#include "uart.h"
 #include "eeprom-conf.h"
 
 uint8_t rom_filename[ROM_NAME_LENGTH+1];
@@ -71,6 +72,8 @@ static EEMEM struct {
   uint8_t  romname[ROM_NAME_LENGTH];
 } __attribute__((packed)) storedconfig;
 
+#define CONFIG_MEMBER_ADDRESS(member) ((uint8_t*)(member)-(uint8_t*)&storedconfig)
+
 /**
  * read_configuration - reads configuration from EEPROM
  *
@@ -79,7 +82,7 @@ static EEMEM struct {
  * be changed.
  */
 void read_configuration(void) {
-  uint_fast16_t i,size;
+  uint_fast16_t i;
   uint8_t checksum, tmp;
 
   /* Set default values */
@@ -94,6 +97,48 @@ void read_configuration(void) {
     return;
   }
 
+#ifdef __ets__
+  eeprom_read_block(&storedconfig, 0, sizeof(storedconfig));
+  uart_trace((void*)&storedconfig, 0, sizeof(storedconfig));
+  /* abort if the size bytes are not set */
+  if (storedconfig.structsize != sizeof(storedconfig)) {
+    eeprom_safety();
+    return;
+  }
+  uint8_t *p;
+  for (checksum = 0, p = (uint8_t *)&storedconfig, i=2;i<sizeof(storedconfig);i++) {
+    checksum += p[i];
+  }
+  if (storedconfig.checksum != checksum) {
+    ETS_DEBUG("Checksum mismatch %x %x ", checksum, storedconfig.checksum);
+    eeprom_safety();
+    return;
+  }
+
+  tmp = storedconfig.global_flags;
+  globalflags &= (uint8_t)~(POSTMATCH | EXTENSION_HIDING);
+  globalflags |= tmp;
+
+  if (storedconfig.hardaddress == device_hw_address())
+    device_address = storedconfig.hardaddress;
+
+  file_extension_mode = storedconfig.fileexts;
+
+#ifdef NEED_DISKMUX
+  set_drive_config(storedconfig.drvconfig0 | storedconfig.drvconfig1 << 16);
+
+  /* sanity check.  If the user has truly turned off all drives, turn the
+   * defaults back on
+   */
+  if(drive_config == 0xffffffff)
+    set_drive_config(get_default_driveconfig());
+#endif
+
+  image_as_dir = storedconfig.imagedirs;
+  strcpy((char*)rom_filename, (char*)&storedconfig.romname);
+
+#else
+  uint_fast16_t size;
   size = eeprom_read_word(&storedconfig.structsize);
 
   /* abort if the size bytes are not set */
@@ -144,6 +189,7 @@ void read_configuration(void) {
 
   if (size > 29)
     eeprom_read_block(rom_filename, &storedconfig.romname, ROM_NAME_LENGTH);
+#endif
 
   /* Prevent problems due to accidental writes */
   eeprom_safety();
@@ -158,6 +204,28 @@ void write_configuration(void) {
   uint_fast16_t i;
   uint8_t checksum;
 
+#ifdef __ets__
+  uint8_t *p;
+  storedconfig.structsize = sizeof(storedconfig);
+  storedconfig.global_flags = globalflags & (POSTMATCH | EXTENSION_HIDING);
+  storedconfig.address = device_address;
+  storedconfig.hardaddress = device_hw_address();
+  storedconfig.fileexts = file_extension_mode;
+#ifdef NEED_DISKMUX
+  storedconfig.drvconfig0 = drive_config;
+  storedconfig.drvconfig1 = drive_config >> 16;
+#endif
+  storedconfig.imagedirs = image_as_dir;
+  memset(&storedconfig.romname, 0, sizeof(storedconfig.romname));
+  strncpy((char*)&storedconfig.romname, (char*)rom_filename, sizeof(storedconfig.romname));
+  for (checksum = 0, p = (uint8_t *)&storedconfig, i=2;i<sizeof(storedconfig);i++) {
+    checksum += p[i];
+  }
+  storedconfig.checksum = checksum;
+  eeprom_write_block(&storedconfig, 0, sizeof(storedconfig));
+  uart_trace((void*)&storedconfig, 0, sizeof(storedconfig));
+
+#else
   /* Write configuration to EEPROM */
   eeprom_write_word(&storedconfig.structsize, sizeof(storedconfig));
   eeprom_write_byte(&storedconfig.global_flags,
@@ -181,6 +249,7 @@ void write_configuration(void) {
 
   /* Store checksum to EEPROM */
   eeprom_write_byte(&storedconfig.checksum, checksum);
+#endif
 
   /* Prevent problems due to accidental writes */
   eeprom_safety();

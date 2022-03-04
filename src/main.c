@@ -119,7 +119,9 @@ int main(void) {
   }
 #endif
 
+#ifndef __ets__
   bus_mainloop();
 
   while (1);
+#endif
 }

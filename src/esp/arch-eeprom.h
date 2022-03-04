@@ -1,4 +1,5 @@
 /* sd2iec - SD/MMC to Commodore serial bus interface/controller
+   Copyright (C) 2022 Jarkko Sonninen <kasper@iki.fi>
    Copyright (C) 2007-2017  Ingo Korb <ingo@akana.de>
 
    Inspired by MMC2IEC by Lars Pontoppidan et al.
@@ -19,21 +20,27 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-   bus.h: Common IEC/IEEE bus definitions
+   arch-eeprom.h: EEPROM access functions
 
 */
 
-#ifndef BUS_H
-#define BUS_H
+#ifndef ARCH_EEPROM_H
+#define ARCH_EEPROM_H
 
-extern uint8_t device_address;
+#define EEMEM
 
-void bus_interface_init(void);
-void bus_init(void);
-#ifdef __ets__
-void bus_mainloop(void);
-#else
-void __attribute__((noreturn)) bus_mainloop(void);
-#endif
+/* No safety required */
+#define eeprom_safety() do {} while (0)
+
+/*
+uint8_t  eeprom_read_byte(uint32_t addr);
+uint16_t eeprom_read_word(uint32_t addr);
+*/
+void     eeprom_read_block(void *destptr, uint32_t addr, unsigned int length);
+/*
+void     eeprom_write_byte(uint32_t addr, uint8_t value);
+void     eeprom_write_word(uint32_t addr, uint16_t value);
+*/
+void     eeprom_write_block(void *srcptr, uint32_t addr, unsigned int length);
 
 #endif

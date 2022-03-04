@@ -1,4 +1,5 @@
 /* sd2iec - SD/MMC to Commodore serial bus interface/controller
+   Copyright (C) 2022 Jarkko Sonninen <kasper@iki.fi>
    Copyright (C) 2007-2017  Ingo Korb <ingo@akana.de>
 
    Inspired by MMC2IEC by Lars Pontoppidan et al.
@@ -19,21 +20,42 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-   bus.h: Common IEC/IEEE bus definitions
+   arch-timer.c: Architecture-specific timer functions
 
 */
 
-#ifndef BUS_H
-#define BUS_H
+#include "config.h"
+#include "timer.h"
+#include <driver/hw_timer.h>
 
-extern uint8_t device_address;
+int    system_get_time(void);
+SYSTEM_TICK_HANDLER;
 
-void bus_interface_init(void);
-void bus_init(void);
-#ifdef __ets__
-void bus_mainloop(void);
-#else
-void __attribute__((noreturn)) bus_mainloop(void);
-#endif
+void timer_init(void) {
+  hw_timer_init(FRC1_SOURCE, 1);
+  hw_timer_set_func(systick_handler);
+  hw_timer_arm(10000);
+}
 
-#endif
+static uint32_t timeout;
+/**
+ * start_timeout - start a timeout
+ * @usecs: number of microseconds before timeout
+ *
+ * This function sets up a timer so it times out after the specified
+ * number of microseconds.
+ */
+
+void start_timeout(uint32_t usecs) {
+  timeout = system_get_time() + usecs;
+}
+
+/**
+ * has_timed_out - returns true if timeout was reached
+ *
+ * This function returns true if the timer started by start_timeout
+ * has reached its timeout value.
+ */
+unsigned int has_timed_out(void) {
+  return timeout - system_get_time() > 0x80000000;
+}

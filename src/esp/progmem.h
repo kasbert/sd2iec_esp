@@ -1,4 +1,5 @@
 /* sd2iec - SD/MMC to Commodore serial bus interface/controller
+   Copyright (C) 2022 Jarkko Sonninen <kasper@iki.fi>
    Copyright (C) 2007-2017  Ingo Korb <ingo@akana.de>
 
    Inspired by MMC2IEC by Lars Pontoppidan et al.
@@ -19,21 +20,22 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-   bus.h: Common IEC/IEEE bus definitions
+   progmem.h: esp/pgmspace.h wrapper header
 
 */
 
-#ifndef BUS_H
-#define BUS_H
+#ifndef PROGMEM_H
+#define PROGMEM_H
 
-extern uint8_t device_address;
+/* No-op wrappers for esp progmem functions */
+#define PROGMEM __attribute__((section(".irom.text")))
+#define PSTR(x) (x)
+#define pgm_read_word(x) (*(x))
+#define pgm_read_byte(x) (*(x))
 
-void bus_interface_init(void);
-void bus_init(void);
-#ifdef __ets__
-void bus_mainloop(void);
-#else
-void __attribute__((noreturn)) bus_mainloop(void);
-#endif
+#define memcpy_P(dest,src,n) memcpy(dest,src,n)
+#define memcmp_P(s1,s2,n)    memcmp(s1,s2,n)
+#define strcpy_P(dest,src)   strcpy(dest,src)
+#define strcmp_P(s1,s2)      strcmp(s1,s2)
 
 #endif

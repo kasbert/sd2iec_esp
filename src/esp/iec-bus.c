@@ -1,4 +1,5 @@
 /* sd2iec - SD/MMC to Commodore serial bus interface/controller
+   Copyright (C) 2022 Jarkko Sonninen <kasper@iki.fi>
    Copyright (C) 2007-2017  Ingo Korb <ingo@akana.de>
 
    Inspired by MMC2IEC by Lars Pontoppidan et al.
@@ -19,21 +20,23 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-   bus.h: Common IEC/IEEE bus definitions
+   iec-bus.c: Architecture-specific IEC bus initialisation
 
+   This is not in arch-config.h becaue using the set_* functions
+   from iec-bus.h simplifies the code and the ARM version isn't
+   space-constrained yet.
 */
 
-#ifndef BUS_H
-#define BUS_H
+#include "config.h"
+#include "iec-bus.h"
 
-extern uint8_t device_address;
+void iec_interface_init(void) {
+  /* Set up outputs before switching the pins */
+  set_atn(1);
+  set_data(1);
+  set_clock(1);
+  set_srq(1);
 
-void bus_interface_init(void);
-void bus_init(void);
-#ifdef __ets__
-void bus_mainloop(void);
-#else
-void __attribute__((noreturn)) bus_mainloop(void);
-#endif
-
-#endif
+  /* SRQ is special-cased because it may be unconnected */
+}
+void bus_interface_init(void) __attribute__ ((weak, alias("iec_interface_init")));
