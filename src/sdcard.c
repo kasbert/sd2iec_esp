@@ -335,9 +335,6 @@ static uint8_t send_command(const uint8_t  card,
 
     /* send command */
 #ifdef __ets__
-    spi_tx_byte(0xff); // TODO remove
-    spi_tx_byte(0xff); // TODO remove
-    spi_tx_byte(0xff); // TODO remove
     spi_transaction(8, cmd, 32, parameter, 8, &crc, 0, 0, 0);
     system_soft_wdt_feed();
 #else

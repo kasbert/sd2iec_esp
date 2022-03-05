@@ -45,6 +45,7 @@ static const generic_2bit_t jiffy_send_def = {
   .eorvalue  = 0
 };
 
+IRAM_ATTR
 uint8_t jiffy_receive(iec_bus_t *busstate) {
   uint8_t result;
 
@@ -75,12 +76,14 @@ uint8_t jiffy_receive(iec_bus_t *busstate) {
   return result;
 }
 
+IRAM_ATTR
 uint8_t jiffy_send(uint8_t value, uint8_t eoi, uint8_t loadflags) {
   unsigned int loadmode = loadflags & 0x80;
   unsigned int skipeoi  = loadflags & 0x7f;
 
   llfl_setup();
-  disable_interrupts();
+  __disable_irq();
+  //disable_interrupts();
 
   /* Initial handshake */
   set_data(1);
@@ -116,7 +119,8 @@ uint8_t jiffy_send(uint8_t value, uint8_t eoi, uint8_t loadflags) {
   /* hold time */
   delay_us(10);
 
-  enable_interrupts();
+  //enable_interrupts();
+  __enable_irq();
   llfl_teardown();
   return !IEC_ATN;
 }

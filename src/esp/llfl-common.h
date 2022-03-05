@@ -36,10 +36,9 @@ typedef struct {
   uint8_t  eorvalue;
 } generic_2bit_t;
 
-extern uint32_t llfl_reference_time;
+#define llfl_setup() do{}while(0)
+#define llfl_teardown() do{}while(0)
 
-void llfl_setup(void);
-void llfl_teardown(void);
 void llfl_wait_atn(unsigned int state);
 void llfl_wait_clock(unsigned int state, llfl_atnabort_t atnabort);
 void llfl_wait_data(unsigned int state, llfl_atnabort_t atnabort);

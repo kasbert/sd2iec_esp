@@ -56,13 +56,20 @@ void spi_select_device(spi_device_t dev) {
   selected_spi_no = (dev == SPIDEV_CARD0) ? 1 : 2;
   // ETS_DEBUG("spi_select_device %d %d ", dev, spi_no);
   if (selected_spi_no != 1) {
+    // NONE selected
     PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDO_U, FUNC_GPIO15);
     gpio_output_set(BIT(15), 0, BIT(15), 0); // Set as high-level output.
   } else {
+    // SDCARD selected
     // PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDO_U, FUNC_GPIO15);
     // gpio_output_set(0, BIT(15), BIT(15), 0); // Set as low-level output.
     // Let HW SPI control the SPI CS line
     PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDO_U, 2);
+
+    // Somehow some block reads fail without these
+    spi_tx_byte(0xff); // TODO remove
+    spi_tx_byte(0xff); // TODO remove
+    spi_tx_byte(0xff); // TODO remove
   }
   // TODO remove
   if (dev & 1)

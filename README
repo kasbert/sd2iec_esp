@@ -974,8 +974,8 @@ The RESET pin can be skipped, sd2iec doesn't need this for full operation.
 ESP8266 considerations
 ======================
 
-* NO Fastloaders
 * NO TCP/IP
+* Only jiffyDOS fastloader. No other Fastloaders
 * NO Buttons
 * Only one (build in) Led
 
@@ -994,7 +994,9 @@ I used Wemos D1 mini with the following pinout
  GPIO3 = RX - (TODO Button 1 ?)
  GPIO1 = TX - (TODO LED 2 ?)
  ADC0 - (TODO Button 2 ?)
- GPIO 12,13,14,15 SD card
+ GPIO 12(MISO),13(MOSI),14(SCLK),15(CS) SD card
+ See https://randomnerdtutorials.com/esp8266-pinout-reference-gpios/
+You need a level converter as ESP8266 is a 3.3V device.
 
 Some of the flash is used as a FAT image. You can create one with linux commands:
  dd if=/dev/zero bs=512 count=7112 of=eeprom.img
