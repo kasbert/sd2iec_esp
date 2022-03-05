@@ -32,9 +32,7 @@ typedef uint32_t tick_t;
 typedef int32_t stick_t;
 
 /* Delay functions */
-static inline void delay_us(unsigned int time) {
-  ets_delay_us(time);
-}
+#define delay_us ets_delay_us
 
 static inline void delay_ms(unsigned int time) {
   // This is used only in some fastloaders and time <= 20ms

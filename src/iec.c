@@ -78,6 +78,7 @@ static iec_bus_t iec_debounced(void) {
 }
 
 /// Checks if ATN has changed and changes state to match (EA59)
+IRAM_ATTR
 uint8_t iec_check_atn(void) {
   if (iec_data.bus_state == BUS_ATNACTIVE)
     if (IEC_ATN) {
@@ -113,6 +114,7 @@ IEC_ATN_HANDLER {
  * if successful. Returns -1 instead if the device state has changed, the
  * caller should return to the main loop immediately in that case.
  */
+IRAM_ATTR
 static int16_t _iec_getc(void) {
   uint8_t i,val;
   iec_bus_t tmp;
@@ -198,6 +200,7 @@ static int16_t _iec_getc(void) {
  * inlined by the compiler. It could be inlined in the C code too, but is kept
  * seperately for clarity.
  */
+IRAM_ATTR
 static int16_t iec_getc(void) {
   int16_t val;
 
@@ -217,6 +220,7 @@ static int16_t iec_getc(void) {
  * a marker for the EOI condition. Returns 0 normally or -1 if the bus state has
  * changed, the caller should return to the main loop in that case.
  */
+IRAM_ATTR
 static uint8_t iec_putc(uint8_t data, const uint8_t with_eoi) {
   uint8_t i;
 
@@ -310,6 +314,7 @@ static uint8_t iec_putc(uint8_t data, const uint8_t with_eoi) {
  *
  * This function handles a listen request from the computer.
  */
+IRAM_ATTR
 static uint8_t iec_listen_handler(const uint8_t cmd) {
   int16_t c;
   buffer_t *buf;
@@ -390,6 +395,7 @@ static uint8_t iec_listen_handler(const uint8_t cmd) {
  *
  * This function handles a talk request from the computer.
  */
+IRAM_ATTR
 static uint8_t iec_talk_handler(uint8_t cmd) {
   buffer_t *buf;
 

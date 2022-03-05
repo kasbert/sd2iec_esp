@@ -65,6 +65,9 @@ CONFIG_UART_DEBUG=y
 # Baud rate of the UART, not used if CONFIG_UART_DEBUG is disabled
 CONFIG_UART_BAUDRATE=115200
 
+# 1kB buffer
+CONFIG_UART_TX_BUF_SHIFT=10
+
 # Output a hex dump of all received commands via serial?
 # Not used if CONFIG_UART_DEBUG is disabled.
 CONFIG_COMMAND_CHANNEL_DUMP=y

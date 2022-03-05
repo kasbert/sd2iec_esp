@@ -86,16 +86,19 @@ void iec_interrupts_init(void) {
 /* Reset MCU */
 void system_reset(void) {
   ETS_DEBUG("system_reset");
+  uart_flush();
   system_restart();
   while (1)
     ;
 }
 
+IRAM_ATTR
 void disable_interrupts(void) {
   // ETS_DEBUG("disable_interrupts");
   __disable_irq();
 }
 
+IRAM_ATTR
 void enable_interrupts(void) {
   // ETS_DEBUG("enable_interrupts");
   __enable_irq();
@@ -133,6 +136,7 @@ void panic(const char *msg) {
   uart_puts_P("PANIC: ");
   uart_puts_P(msg);
   uart_putcrlf();
+  uart_flush();
 
   for (i = 0;; i++) {
     /* Set GPIO */
@@ -158,17 +162,20 @@ LOCAL void ICACHE_FLASH_ATTR status_timer_callback(void *arg) {
     (input & IEC_BIT_DATA) ? "DAT:1 " : "DAT:_ ",
     gpio16_input_get() ? "SRQ:1 " : "SRQ:_ ");
   */
+  uart_flush();
 }
 
 void mainloop_task(os_event_t *e) {
   switch (e->sig) {
   case SIG_ATN:
-    debug_state();
-    ETS_DEBUG("enter mainloop");
+    //debug_state();
+    uart_putc('>');
+    uart_putcrlf();
     in_mainloop = 1;
     bus_mainloop();
     in_mainloop = 0;
-    ETS_DEBUG("exit mainloop");
+    uart_putc('<');
+    uart_putcrlf();
     debug_state();
     break;
 
@@ -176,6 +183,7 @@ void mainloop_task(os_event_t *e) {
     ETS_DEBUG("sig	%d\n", e->sig);
     break;
   }
+  uart_flush();
 }
 
 void task_init(void) {
@@ -200,6 +208,7 @@ void ICACHE_FLASH_ATTR init_done(void) {
 
   set_atn_irq(1);
   ETS_DEBUG("init_done");
+  uart_flush();
 }
 
 void ICACHE_FLASH_ATTR user_init(void) {
@@ -209,6 +218,7 @@ void ICACHE_FLASH_ATTR user_init(void) {
   gpio_init();
   system_update_cpu_freq(CONFIG_MCU_FREQ / 1000000); // 80 or 160
   system_init_done_cb(init_done);
+  uart_flush();
 }
 
 static const partition_item_t at_partition_table[] = {

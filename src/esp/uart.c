@@ -43,8 +43,11 @@ void uart_div_modify(uint8 uart_no, uint32 DivLatchValue);
 #define UART0   0
 #define UART1   1
 
-//static volatile uint16_t read_idx;
-//static volatile uint16_t write_idx;
+static char txbuf[1 << CONFIG_UART_TX_BUF_SHIFT];
+static volatile uint16_t read_idx;
+static volatile uint16_t write_idx;
+
+void uart_tx(char c);
 
 void uart_puthex(uint8_t num) {
   uint8_t tmp;
@@ -101,9 +104,11 @@ void uart_trace(void *ptr, uint16_t start, uint16_t len) {
   }
 }
 
-void sd2iec_uart_flush(void) {
-  // FIXME implement
-  // while (read_idx != write_idx) ;
+void uart_flush(void) {
+  while (read_idx != write_idx) {
+    uart_tx(txbuf[read_idx]);
+    read_idx = (read_idx+1) & (sizeof(txbuf)-1);
+  }
 }
 
 void uart_puts_P(const char *text) {
@@ -122,6 +127,29 @@ uint8_t uart_getc(void) {
   // FIXME not implemented
   uint8_t c = -1;
   return c;
+}
+
+static void uart_fill_buffer(void) {
+  uint8_t uart = 0;
+  while (read_idx != write_idx) {
+    char c = txbuf[read_idx];
+    uint32_t fifo_cnt = READ_PERI_REG(UART_STATUS(uart)) & (UART_TXFIFO_CNT << UART_TXFIFO_CNT_S);
+    if ((fifo_cnt >> UART_TXFIFO_CNT_S & UART_TXFIFO_CNT) >= 126) {
+      break;
+    }
+    WRITE_PERI_REG(UART_FIFO(uart), c);
+    read_idx = (read_idx+1) & (sizeof(txbuf)-1);
+  }
+}
+
+void uart_putc(char c) {
+  int tmp = (write_idx+1) & (sizeof(txbuf)-1);
+  if (read_idx == tmp) {
+    uart_flush();
+  }
+  txbuf[write_idx] = c;
+  write_idx = tmp;
+  uart_fill_buffer();
 }
 
 /*
@@ -148,7 +176,7 @@ uint8_t uart_getc(void) {
  *
  */
 
-void uart_putc(char c)
+void uart_tx(char c)
 {
     uint8_t uart = 0;
     while (1) {

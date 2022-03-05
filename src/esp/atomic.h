@@ -49,9 +49,6 @@
 #define xt_rsil(level) (__extension__({uint32_t state; __asm__ __volatile__("rsil %0," __STRINGIFY(level) : "=a" (state) :: "memory"); state;}))
 #define xt_wsr_ps(state)  __asm__ __volatile__("wsr %0,ps; isync" :: "a" (state) : "memory")
 
-#define __disable_irq() xt_rsil(15)
-#define __enable_irq() xt_rsil(0)
-
 static inline unsigned long arch_local_irq_save(void)
 {
   unsigned long flags;

@@ -46,6 +46,7 @@ static uint32_t timeout;
  * number of microseconds.
  */
 
+IRAM_ATTR
 void start_timeout(uint32_t usecs) {
   timeout = system_get_time() + usecs;
 }
@@ -56,6 +57,7 @@ void start_timeout(uint32_t usecs) {
  * This function returns true if the timer started by start_timeout
  * has reached its timeout value.
  */
+IRAM_ATTR
 unsigned int has_timed_out(void) {
-  return timeout - system_get_time() > 0x80000000;
+  return timeout - system_get_time() >= 0x80000000;
 }

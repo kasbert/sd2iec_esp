@@ -105,4 +105,9 @@ static inline void board_init(void) {
 #  endif
 #endif
 
+// Ignore ESP RAM qualifier in other platforms
+#ifndef IRAM_ATTR
+#     define IRAM_ATTR
+#endif
+
 #endif

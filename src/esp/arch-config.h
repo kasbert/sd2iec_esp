@@ -382,6 +382,11 @@ static inline uint8_t display_intrq_active(void) {
 #endif
 
 
+#define __STRINGIFY(a) #a
+#define xt_rsil(level) (__extension__({uint32_t state; __asm__ __volatile__("rsil %0," __STRINGIFY(level) : "=a" (state) :: "memory"); state;}))
+#define __disable_irq() xt_rsil(15)
+#define __enable_irq() xt_rsil(0)
+
 // Minimal ctype functions
 // Prevent undefined reference to __locale_ctype_ptr
 #undef toupper
