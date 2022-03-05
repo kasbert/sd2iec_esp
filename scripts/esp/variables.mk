@@ -17,7 +17,27 @@ endif
 ifeq ($(CONFIG_LOADER_DREAMLOAD),y)
   SRC += esp/llfl-dreamload.c
 endif
+ifeq ($(CONFIG_LOADER_FC3),y)
 SRC += esp/llfl-fc3exos.c
+endif
+ifeq ($(CONFIG_LOADER_AR6),y)
+SRC += esp/llfl-ar6.c
+endif
+ifeq ($(CONFIG_LOADER_ULOAD3),y)
+SRC += esp/llfl-ulm3.c
+endif
+ifeq ($(CONFIG_LOADER_EPYXCART),y)
+SRC += esp/llfl-epyxcart.c
+endif
+ifeq ($(CONFIG_LOADER_GEOS),y)
+SRC += esp/llfl-geos.c
+endif
+ifeq ($(CONFIG_PARALLEL_DOLPHIN),y)
+SRC += esp/llfl-parallel.c
+endif
+ifeq ($(CONFIG_LOADER_N0SDOS),y)
+SRC += esp/llfl-n0sdos.c
+endif
 
 #---------------- Toolchain ----------------
 CC = xtensa-lx106-elf-gcc

@@ -75,46 +75,46 @@ CONFIG_COMMAND_CHANNEL_DUMP=y
 
 # Enable Turbodisk soft fastloader support
 # This option requires an external crystal oscillator!
-CONFIG_LOADER_TURBODISK=n
+CONFIG_LOADER_TURBODISK=y
 
 # Enable Final Cartridge III fast loader
-CONFIG_LOADER_FC3=n
+CONFIG_LOADER_FC3=y
 
 # Enable Dreamload fast loader
-CONFIG_LOADER_DREAMLOAD=n
+CONFIG_LOADER_DREAMLOAD=y
 
 # Enable ULoad Model 3 fast loader
-CONFIG_LOADER_ULOAD3=n
+CONFIG_LOADER_ULOAD3=y
 
 # Enable G.I. Joe fast loader
-CONFIG_LOADER_GIJOE=n
+CONFIG_LOADER_GIJOE=y
 
 # Enable Epyx Fast Load cartridge fast loader
-CONFIG_LOADER_EPYXCART=n
+CONFIG_LOADER_EPYXCART=y
 
 # Enable GEOS fast loaders
-CONFIG_LOADER_GEOS=n
+CONFIG_LOADER_GEOS=y
 
 # Enable Wheels fast loaders (requires CONFIG_LOADER_GEOS=y)
-CONFIG_LOADER_WHEELS=n
+CONFIG_LOADER_WHEELS=y
 
 # Enable Nippon fast loader
-CONFIG_LOADER_NIPPON=n
+CONFIG_LOADER_NIPPON=y
 
 # Enable (some) Action Replay 6 fast loaders
-CONFIG_LOADER_AR6=n
+CONFIG_LOADER_AR6=y
 
 # Enable ELoad Version 1 fast loader
-CONFIG_LOADER_ELOAD1=n
+CONFIG_LOADER_ELOAD1=y
 
 # Enable Maniac Mansion/Zak McKracken fast loader
-CONFIG_LOADER_MMZAK=n
+CONFIG_LOADER_MMZAK=y
 
 # Enable N0stalgia fastloaders
-CONFIG_LOADER_N0SDOS=n
+CONFIG_LOADER_N0SDOS=y
 
 # Enable Sam's Journey fastloader
-CONFIG_LOADER_SAMSJOURNEY=n
+CONFIG_LOADER_SAMSJOURNEY=y
 
 # Enable DolphinDOS parallel speeder
 CONFIG_PARALLEL_DOLPHIN=n

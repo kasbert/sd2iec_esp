@@ -362,12 +362,10 @@ static inline void set_atn_irq(uint8_t state) {
 }
 
 /* Enable/disable CLOCK interrupt */
-/*
 #define HAVE_CLOCK_IRQ
 static inline void set_clock_irq(uint8_t state) {
   gpio_pin_intr_state_set(IEC_PIN_CLOCK, state ? GPIO_PIN_INTR_NEGEDGE : GPIO_PIN_INTR_DISABLE);
 }
-*/
 
 /* Display interrupt pin */
 #ifdef CONFIG_REMOTE_DISPLAY

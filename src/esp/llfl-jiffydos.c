@@ -82,8 +82,7 @@ uint8_t jiffy_send(uint8_t value, uint8_t eoi, uint8_t loadflags) {
   unsigned int skipeoi  = loadflags & 0x7f;
 
   llfl_setup();
-  __disable_irq();
-  //disable_interrupts();
+  disable_interrupts();
 
   /* Initial handshake */
   set_data(1);
@@ -119,8 +118,7 @@ uint8_t jiffy_send(uint8_t value, uint8_t eoi, uint8_t loadflags) {
   /* hold time */
   delay_us(10);
 
-  //enable_interrupts();
-  __enable_irq();
+  enable_interrupts();
   llfl_teardown();
   return !IEC_ATN;
 }

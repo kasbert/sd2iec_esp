@@ -121,8 +121,6 @@ static void pin_intr_handler(void *ctx) {
   iec_atn_handler();
 
 #ifdef CONFIG_LOADER_DREAMLOAD
-// TODO add other pin interrupts
-#error "FIXME"
   iec_clock_handler();
 #endif
 
