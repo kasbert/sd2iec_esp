@@ -171,10 +171,10 @@ char *sdcmd2str(int cmd) {
 #endif
 
 /**
- * swap_word - swaps the bytes in a uint32 value
+ * swap_word - swaps the bytes in a uint32_t value
  * @input: input byte
  *
- * This function swaps the words in a uint32 value to convert
+ * This function swaps the words in a uint32_t value to convert
  * between little and big endian. Returns the word with bytes
  * swapped.
  */

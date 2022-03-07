@@ -975,10 +975,11 @@ ESP8266 considerations
 ======================
 
 * NO TCP/IP
-* Only jiffyDOS fastloader. No other Fastloaders
 * NO Buttons
 * Only one (build in) Led
+* Fastloaders are not tested.
 
+Install ESP8266 gcc. See https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/linux-setup.html
 Fetch ESP8266_NONOS_SDK from https://github.com/espressif/ESP8266_NONOS_SDK
 Point environment variable ESP_SDK to the SDK directory.
 Install esptool.

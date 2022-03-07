@@ -113,7 +113,7 @@ IEC_CLOCK_HANDLER;
 
 IRAM_ATTR
 static void pin_intr_handler(void *ctx) {
-  uint32 gpio_status;
+  uint32_t gpio_status;
   gpio_status = GPIO_REG_READ(GPIO_STATUS_ADDRESS);
   // clear	interrupt	status
   GPIO_REG_WRITE(GPIO_STATUS_W1TC_ADDRESS, gpio_status);
@@ -145,12 +145,29 @@ void panic(const char *msg) {
   }
 }
 
+#ifdef CONFIG_NETWORK
+char * wifistatus2str(int status) {
+  switch (status) {
+    case STATION_IDLE: return "STATION_IDLE";
+    case STATION_CONNECTING: return "STATION_CONNECTING";
+    case STATION_WRONG_PASSWORD: return "STATION_WRONG_PASSWORD";
+    case STATION_NO_AP_FOUND: return "STATION_NO_AP_FOUND";
+    case STATION_CONNECT_FAIL: return "STATION_CONNECT_FAIL";
+    case STATION_GOT_IP: return "STATION_GOT_IP";
+    default: return "UNKNOWN";
+  };
+}
+#endif
+
 // Just to indicate that the device is alive
 // TODO remove
 LOCAL void ICACHE_FLASH_ATTR status_timer_callback(void *arg) {
   if (!(led_state)) {
     toggle_led();
   }
+#ifdef CONFIG_NETWORK
+  ETS_DEBUG("STATION %s ", wifistatus2str(wifi_station_get_connect_status()));
+#endif
   debug_state();
   /*
     input = IEC_INPUT;
@@ -209,6 +226,7 @@ void ICACHE_FLASH_ATTR init_done(void) {
   uart_flush();
 }
 
+
 void ICACHE_FLASH_ATTR user_init(void) {
   uart_init();
   ets_install_putc1(uart_putc);
@@ -216,6 +234,9 @@ void ICACHE_FLASH_ATTR user_init(void) {
   gpio_init();
   system_update_cpu_freq(CONFIG_MCU_FREQ / 1000000); // 80 or 160
   system_init_done_cb(init_done);
+
+  wifi_set_opmode(STATIONAP_MODE);	//Set	softAP	+	station	mode
+
   uart_flush();
 }
 

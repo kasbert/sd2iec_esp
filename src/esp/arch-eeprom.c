@@ -37,7 +37,7 @@ uint8_t eeprom_read_byte(uint32_t ptr) {
   uint8_t val;
   spi_flash_read(addr, (uint32_t*)&val, 1);
   //ETS_DEBUG("eeprom_read_byte %x: %x", ptr, val);
-  //ETS_DEBUG("eeprom_read_direct %x + %x: %x", FLASH_EEPROM_OFFSET, ptr, ((uint8*)(0x40200000 + 0x10000 + ptr))[0]);
+  //ETS_DEBUG("eeprom_read_direct %x + %x: %x", FLASH_EEPROM_OFFSET, ptr, ((uint8_t*)(0x40200000 + 0x10000 + ptr))[0]);
   return val;
 }
 
@@ -46,7 +46,7 @@ uint16_t eeprom_read_word(uint32_t ptr) {
   uint16_t val;
   spi_flash_read(addr, (uint32_t*)&val, 2);
   ETS_DEBUG("eeprom_read_word %x + %x: %x", FLASH_EEPROM_OFFSET, ptr, val);
-  //ETS_DEBUG("eeprom_read_direct %x + %x: %x", FLASH_EEPROM_OFFSET, ptr, ((uint16*)(0x40200000 + 0x10000 + ptr))[0]);
+  //ETS_DEBUG("eeprom_read_direct %x + %x: %x", FLASH_EEPROM_OFFSET, ptr, ((uint16_t*)(0x40200000 + 0x10000 + ptr))[0]);
   return val;
 }
 */
@@ -65,7 +65,7 @@ void eeprom_write_byte(uint32_t ptr, uint8_t value) {
     return;
   }
   ETS_DEBUG("eeprom_write_byte %x %x", ptr, value);
-  spi_flash_write(addr, (uint32 *)&value, 1);
+  spi_flash_write(addr, (uint32_t*)&value, 1);
 }
 
 void eeprom_write_word(uint32_t ptr, uint16_t value) {
@@ -74,7 +74,7 @@ void eeprom_write_word(uint32_t ptr, uint16_t value) {
     return;
   }
   ETS_DEBUG("eeprom_write_word %x + %x %x", FLASH_EEPROM_OFFSET, ptr, value);
-  spi_flash_write(addr, (uint32 *)&value, 2);
+  spi_flash_write(addr, (uint32_t*)&value, 2);
 }
 */
 

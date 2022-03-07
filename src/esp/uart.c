@@ -38,7 +38,7 @@
 #include <driver/uart.h>
 #undef uart_init
 
-void uart_div_modify(uint8 uart_no, uint32 DivLatchValue);
+void uart_div_modify(uint8_t uart_no, uint32_t DivLatchValue);
 
 #define UART0   0
 #define UART1   1

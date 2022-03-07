@@ -43,7 +43,7 @@ typedef enum {
 
 static int selected_spi_no = 1;
 
-static void esp_spi_set_speed(uint8 spi_no, SpiSpeed speed);
+static void esp_spi_set_speed(uint8_t spi_no, SpiSpeed speed);
 
 /* SD SS pin default implementation */
 #ifndef SDCARD_SS_SPECIAL
@@ -183,11 +183,11 @@ for (i = 0; i < length; i++) {
 #define SPI_CLK_FREQ                                                           \
   CPU_CLK_FREQ / (SPI_CLK_PREDIV * SPI_CLK_CNTDIV) // 80 / 20 = 4 MHz
 
-void spi_mode(uint8 spi_no, uint8 spi_cpha, uint8 spi_cpol);
-void spi_init_gpio(uint8 spi_no, uint8 sysclk_as_spiclk);
-void spi_clock(uint8 spi_no, uint16 prediv, uint8 cntdiv);
-void spi_tx_byte_order(uint8 spi_no, uint8 byte_order);
-void spi_rx_byte_order(uint8 spi_no, uint8 byte_order);
+void spi_mode(uint8_t spi_no, uint8_t spi_cpha, uint8_t spi_cpol);
+void spi_init_gpio(uint8_t spi_no, uint8_t sysclk_as_spiclk);
+void spi_clock(uint8_t spi_no, uint16_t prediv, uint8_t cntdiv);
+void spi_tx_byte_order(uint8_t spi_no, uint8_t byte_order);
+void spi_rx_byte_order(uint8_t spi_no, uint8_t byte_order);
 
 // Expansion Macros
 #define spi_busy(spi_no) READ_PERI_REG(SPI_CMD(spi_no)) & SPI_USR
@@ -201,7 +201,7 @@ void spi_rx_byte_order(uint8 spi_no, uint8 byte_order);
 ////////////////////////////////////////////////////////////////////////////////
 
 void spi_init(spi_speed_t speed) {
-  uint8 spi_no = 1;
+  uint8_t spi_no = 1;
   spi_init_gpio(spi_no, SPI_CLK_USE_DIV);
 
   // spi_clock(spi_no, SPI_CLK_PREDIV, SPI_CLK_PREDIV);
@@ -234,7 +234,7 @@ void spi_init(spi_speed_t speed) {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-void spi_mode(uint8 spi_no, uint8 spi_cpha, uint8 spi_cpol) {
+void spi_mode(uint8_t spi_no, uint8_t spi_cpha, uint8_t spi_cpol) {
   if (!spi_cpha == !spi_cpol) {
     CLEAR_PERI_REG_MASK(SPI_USER(spi_no), SPI_CK_OUT_EDGE);
   } else {
@@ -261,12 +261,12 @@ void spi_mode(uint8 spi_no, uint8 spi_cpha, uint8 spi_cpol) {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-void spi_init_gpio(uint8 spi_no, uint8 sysclk_as_spiclk) {
+void spi_init_gpio(uint8_t spi_no, uint8_t sysclk_as_spiclk) {
 
   //	if(spi_no > 1) return; //Not required. Valid spi_no is checked with
   //if/elif below.
 
-  uint32 clock_div_flag = 0;
+  uint32_t clock_div_flag = 0;
   if (sysclk_as_spiclk) {
     clock_div_flag = 0x0001;
   }
@@ -306,7 +306,7 @@ void spi_init_gpio(uint8 spi_no, uint8 sysclk_as_spiclk) {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-static void esp_spi_set_speed(uint8 spi_no, SpiSpeed speed) {
+static void esp_spi_set_speed(uint8_t spi_no, SpiSpeed speed) {
   if (1 < speed) {
     uint8_t i, k;
     i = (speed / 40) ? (speed / 40) : 1;
@@ -323,7 +323,7 @@ static void esp_spi_set_speed(uint8 spi_no, SpiSpeed speed) {
   }
 }
 
-void spi_clock(uint8 spi_no, uint16 prediv, uint8 cntdiv) {
+void spi_clock(uint8_t spi_no, uint16_t prediv, uint8_t cntdiv) {
 
   if (spi_no > 1)
     return;
@@ -363,7 +363,7 @@ void spi_clock(uint8 spi_no, uint16 prediv, uint8 cntdiv) {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-void spi_tx_byte_order(uint8 spi_no, uint8 byte_order) {
+void spi_tx_byte_order(uint8_t spi_no, uint8_t byte_order) {
 
   if (spi_no > 1)
     return;
@@ -395,7 +395,7 @@ void spi_tx_byte_order(uint8 spi_no, uint8 byte_order) {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-void spi_rx_byte_order(uint8 spi_no, uint8 byte_order) {
+void spi_rx_byte_order(uint8_t spi_no, uint8_t byte_order) {
 
   if (spi_no > 1)
     return;
@@ -421,7 +421,7 @@ void spi_rx_byte_order(uint8 spi_no, uint8 byte_order) {
 //				  dout_data - output data
 //				  din_bits - actual number of bits to receive
 //
-//		 Returns: read data - uint32 containing read in data only if RX
+//		 Returns: read data - uint32_t containing read in data only if RX
 //was set 				  0 - something went wrong (or actual read data was 0) 				  1 - data sent ok
 //(or actual read data is 1) 				  Note: all data is assumed to be stored in the lower
 //bits of 				  the data variables (for anything <32 bits).
@@ -433,7 +433,7 @@ uint32_t spi_transaction(uint8_t cmd_bits, uint16_t cmd_data,
                          uint32_t dout_bits, const void *dout_data,
                          uint32_t din_bits, void *din_data,
                          uint32_t dummy_bits) {
-  uint8 spi_no = 1;
+  uint8_t spi_no = 1;
 
   // FIXME send some clocks
   if (selected_spi_no > 1) { // Check for a valid SPI
@@ -490,7 +490,7 @@ uint32_t spi_transaction(uint8_t cmd_bits, uint16_t cmd_data,
   if (cmd_bits) {
     SET_PERI_REG_MASK(SPI_USER(spi_no),
                       SPI_USR_COMMAND); // enable COMMAND function in SPI module
-    uint16 command = cmd_data
+    uint16_t command = cmd_data
                      << (16 - cmd_bits); // align command data to high bits
     command =
         ((command >> 8) & 0xff) | ((command << 8) & 0xff00); // swap byte order

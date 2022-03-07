@@ -29,7 +29,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#define uint32 uint32_t
 #undef bool
 #undef false
 #undef true
